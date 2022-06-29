@@ -2,40 +2,63 @@
 
 namespace _2048
 {
-    class Program
+    internal class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             int Size = 4;
-
-            Board b = new Board(Size);
-            b.PrintBoard();
-            
+            var b = new Board(Size);
+            b.genRandomTile();
             while (true)
             {
+                b.genRandomTile();
+                b.PrintBoard();
                 var ch = Console.ReadKey(false).Key;
-                switch(ch)
+                switch (ch)
                 {
                     case ConsoleKey.RightArrow:
-                        b.isGameOver();
                         Console.WriteLine("right");
+                        b.moveRight();
+                        if (b.isGameOver())
+                        {
+                            Console.WriteLine("game over");
+                            break;
+                        }
+
                         continue;
                     case ConsoleKey.LeftArrow:
-                        b.isGameOver();
                         Console.WriteLine("left");
+                        b.moveLeft();
+                        if (b.isGameOver())
+                        {
+                            Console.WriteLine("game over");
+                            break;
+                        }
+
                         continue;
                     case ConsoleKey.UpArrow:
-                        b.isGameOver();
                         Console.WriteLine("up");
+                        b.moveUp();
+                        if (b.isGameOver())
+                        {
+                            Console.WriteLine("game over");
+                            break;
+                        }
+
                         continue;
                     case ConsoleKey.DownArrow:
-                        b.isGameOver();
                         Console.WriteLine("down");
+                        b.moveDown();
+                        if (b.isGameOver())
+                        {
+                            Console.WriteLine("game over");
+                            break;
+                        }
+
                         continue;
                 }
+
             }
-
-
         }
     }
 }
