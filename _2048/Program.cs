@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace _2048
 {
@@ -18,43 +18,42 @@ namespace _2048
                 {
                     case ConsoleKey.RightArrow:
                         Console.WriteLine("right");
-                        b.moveRight();
                         if (b.isGameOver())
                         {
                             Console.WriteLine("game over");
                             break;
                         }
-
+                        b.moveRight();
                         continue;
+
                     case ConsoleKey.LeftArrow:
                         Console.WriteLine("left");
-                        b.moveLeft();
                         if (b.isGameOver())
                         {
                             Console.WriteLine("game over");
                             break;
                         }
-
+                        b.moveLeft();
                         continue;
+
                     case ConsoleKey.UpArrow:
                         Console.WriteLine("up");
-                        b.moveUp();
                         if (b.isGameOver())
                         {
                             Console.WriteLine("game over");
                             break;
                         }
-
+                        b.moveUp();
                         continue;
+
                     case ConsoleKey.DownArrow:
                         Console.WriteLine("down");
-                        b.moveDown();
                         if (b.isGameOver())
                         {
                             Console.WriteLine("game over");
                             break;
                         }
-
+                        b.moveDown();
                         continue;
                 }
 
