@@ -6,57 +6,64 @@ namespace _2048
     {
         private static void Main(string[] args)
         {
-            int Size = 4;
-            var b = new Board(Size);
-            b.genRandomTile();
+            int size = 4;
+            var b = new Board(size);
+            b.GenRandomTile();
             while (true)
             {
-                b.genRandomTile();
+                b.GenRandomTile();
                 b.PrintBoard();
                 var ch = Console.ReadKey(false).Key;
                 switch (ch)
                 {
                     case ConsoleKey.RightArrow:
                         Console.WriteLine("right");
-                        if (b.isGameOver())
+                        if (b.IsGameOver())
                         {
                             Console.WriteLine("game over");
                             break;
                         }
-                        b.moveRight();
+
+                        b.MoveRight();
                         continue;
 
                     case ConsoleKey.LeftArrow:
                         Console.WriteLine("left");
-                        if (b.isGameOver())
+                        if (b.IsGameOver())
                         {
                             Console.WriteLine("game over");
                             break;
                         }
-                        b.moveLeft();
+
+                        b.MoveLeft();
                         continue;
 
                     case ConsoleKey.UpArrow:
                         Console.WriteLine("up");
-                        if (b.isGameOver())
+                        if (b.IsGameOver())
                         {
                             Console.WriteLine("game over");
                             break;
                         }
-                        b.moveUp();
+
+                        b.MoveUp();
                         continue;
 
                     case ConsoleKey.DownArrow:
                         Console.WriteLine("down");
-                        if (b.isGameOver())
+                        if (b.IsGameOver())
                         {
                             Console.WriteLine("game over");
                             break;
                         }
-                        b.moveDown();
-                        continue;
-                }
 
+                        b.MoveDown();
+                        continue;
+                    default:
+                        Console.WriteLine("You stoopid, this is not a valid key bozo");
+                        continue;
+                    
+                }
             }
         }
     }
