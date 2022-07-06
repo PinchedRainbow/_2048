@@ -245,18 +245,22 @@ namespace _2048
                     {
                         continue;
                     }
+
+                    int temp = j;
                     for (int k = j - 1; k >= 0; k--)
                     {
                         if (board[k, i].Number == 0)
                         {
                             continue;
                         }
-                        if (board[j, i].Number == board[k, i].Number)
+                        if (board[temp, i].Number == board[k, i].Number)
                         {
-                            board[j, i].Number += board[k, i].Number;
+                            board[temp, i].Number += board[k, i].Number;
                             board[k, i].Number = 0;
                             break;
                         }
+
+                        temp--;
                     }
                 }
             }
@@ -274,18 +278,21 @@ namespace _2048
                         continue;
                     }
 
+                    int temp = j;
                     for (int k = j - 1; k >= 0; k--)
                     {
                         if (board[i, k].Number == 0)
                         {
                             continue;
                         }
-                        if (board[i, j].Number == board[i, k].Number)
+                        if (board[i, temp].Number == board[i, k].Number)
                         {
-                            board[i, j].Number *= 2;
+                            board[i, temp].Number *= 2;
                             board[i, k].Number = 0;
                             break;
                         }
+
+                        temp--;
                     }
                 }
             }
@@ -303,18 +310,22 @@ namespace _2048
                     {
                         continue;
                     }
+
+                    int temp = j;
                     for (int k = j + 1; k < size; k++)
                     {
                         if (board[k, i].Number == 0)
                         {
                             continue;
                         }
-                        if (board[j, i].Number == board[k, i].Number)
+                        if (board[temp, i].Number == board[k, i].Number)
                         {
-                            board[j, i].Number += board[k, i].Number;
+                            board[temp, i].Number += board[k, i].Number;
                             board[k, i].Number = 0;
                             break;
                         }
+
+                        temp++;
                     }
                 }
             }
@@ -332,18 +343,21 @@ namespace _2048
                         continue;
                     }
 
+                    int temp = j;
                     for (int k = j + 1; k < size; k++)
                     {
                         if (board[i, k].Number == 0)
                         {
                             continue;
                         }
-                        if (board[i, j].Number == board[i, k].Number)
+                        if (board[i, temp].Number == board[i, k].Number)
                         {
-                            board[i, j].Number *= 2;
+                            board[i, temp].Number *= 2;
                             board[i, k].Number = 0;
                             break;
                         }
+
+                        temp++;
                     }
                 }
             }
