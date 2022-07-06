@@ -13,18 +13,14 @@ namespace _2048
         // The weightings which affect bias towards attributes of possible board states.
         private readonly double _mergeWeight;
         private readonly double _emptyWeight;
-        private readonly double _cornerWeight;
-        private readonly double _edgeWeight;
 
         /// <summary>
         /// Initialises the respective weights of the AI.
         /// </summary>
-        public Harvey(double mergeWeight, double emptyWeight, double cornerWeight, double edgeWeight)
+        public Harvey(double mergeWeight, double emptyWeight)
         {
             _mergeWeight = mergeWeight;
             _emptyWeight = emptyWeight;
-            _cornerWeight = cornerWeight;
-            _edgeWeight = edgeWeight;
         }
 
         /// <summary>
@@ -43,12 +39,28 @@ namespace _2048
                 ConsoleKey.LeftArrow,
                 ConsoleKey.RightArrow
             };
-
-            // Create a list of all possible board states from those moves
-            List<Board> boards = moves.Select(b.move).ToList();
+            
+            // Get the board string of the current board
+            var boardString = b.getBoardString();
+            
+            // Create a list of all possible board states
+            var boardStates = new List<Tile[,]>();
+            int size = b.getSize();
+            
+            // For each possible move, create a new board state and add it to the list of board states
+            foreach (var move in moves)
+            {
+                var newBoard = new Board(size);
+                newBoard.readBoardString(boardString);
+                newBoard.move(move);
+                boardStates.Add(newBoard.getTiles());
+            }
 
             //Create a list of scores for each board state
-            List<double> scores = boards.Select(getScore).ToList();
+            List<double> scores = boardStates.Select(getScore).ToList();
+            
+            // Display all scores for debugging purposes
+            //Console.WriteLine(string.Join(", ", scores));
 
             //Find the highest score
             double max = scores[0];
@@ -60,6 +72,16 @@ namespace _2048
                 maxIndex = i;
             }
             
+            // Displays information about the best board:
+            Console.WriteLine("### BEST BOARD STATISTICS ###");
+            Console.WriteLine($"Total Score: {max}\n" +
+                              $"Merge Score: {getMergeScore(boardStates[maxIndex])}\n" +
+                              $"Empty Score: {getEmptyScore(boardStates[maxIndex])}\n" +
+                              $"Actual Score: {getActualScore(boardStates[maxIndex])}\n" +
+                              $"Move: {moves[maxIndex]}\n");
+            Console.WriteLine("### END BOARD STATISTICS ###\n");
+            
+            
             //Return the move that corresponds to the highest score
             return moves[maxIndex];
         }
@@ -69,14 +91,12 @@ namespace _2048
         /// </summary>
         /// <param name="board">The board to calculate the total score for.</param>
         /// <returns>The total score of a board.</returns>
-        private double getScore(Board board)
+        private double getScore(Tile[,] board)
         {
             // calculate a score based on weightings of the board state
             double score = 0.0;
             score += getMergeScore(board);
             score += getEmptyScore(board);
-            score += getCornerScore(board);
-            score += getEdgeScore(board);
             // needs scaling to be in line with other values
             score += getActualScore(board);
             
@@ -88,13 +108,13 @@ namespace _2048
         /// </summary>
         /// <param name="board">The board to estimate the actual score for.</param>
         /// <returns>The estimated actual score.</returns>
-        private static double getActualScore(Board board)
+        private static double getActualScore(Tile[,] board)
         {
             double score = 0.0;
             
             // In 2048, score is only gained from merging tiles together. We can estimate the total score gained by merging up to the value of a tile below.
             // Note: This is not a true score, but rather an estimate of the score gained by merging tiles, as we assume that only 2 tiles are generated.
-            score += (from Tile tile in board.getTiles() // iterates through each tile in the board
+            score += (from Tile tile in board // iterates through each tile in the board
                 where tile.Number != 0 && tile.Number != 2 // ignore empty and 2 tiles
                 select Math.Log2(tile.Number) into n // calculates the log2 of the tile's number
                 select (float)((n - 1) * Math.Pow(2, n))).Sum(); // adds the total score of the tile to the total score
@@ -116,76 +136,15 @@ namespace _2048
         }
 
         /// <summary>
-        /// Calculates a score based on the number of empty tiles on the edges of the board.
-        /// </summary>
-        /// <param name="board">The board to calculate a score for.</param>
-        /// <returns>The calculated edge score.</returns>
-        private double getEdgeScore(Board board)
-        {
-            double score = 0.0;
-            int edgeCount = 0;
-            for (int i = 0; i < board.getSize(); i++)
-            {
-                if (board.getTiles()[i, 0].Number == 0)
-                {
-                    edgeCount++;
-                }
-                if (board.getTiles()[i, board.getSize() - 1].Number == 0)
-                {
-                    edgeCount++;
-                }
-                if (board.getTiles()[0, i].Number == 0)
-                {
-                    edgeCount++;
-                }
-                if (board.getTiles()[board.getSize() - 1, i].Number == 0)
-                {
-                    edgeCount++;
-                }
-            }
-            score += _edgeWeight * edgeCount;
-            return score;
-        }
-
-        /// <summary>
-        /// Calculate a score based on the number of empty tiles in the corners.
-        /// </summary>
-        /// <param name="board">The board to calculate a score for.</param>
-        /// <returns>The calculated corner score.</returns>
-        private double getCornerScore(Board board)
-        {
-            double score = 0.0;
-            int cornerCount = 0;
-            if (board.getTiles()[0, 0].Number == 0)
-            {
-                cornerCount++;
-            }
-            if (board.getTiles()[0, board.getSize() - 1].Number == 0)
-            {
-                cornerCount++;
-            }
-            if (board.getTiles()[board.getSize() - 1, 0].Number == 0)
-            {
-                cornerCount++;
-            }
-            if (board.getTiles()[board.getSize() - 1, board.getSize() - 1].Number == 0)
-            {
-                cornerCount++;
-            }
-            score += _cornerWeight * cornerCount;
-            return score;
-        }
-
-        /// <summary>
         /// Calculates a score based on the total number of empty tiles on the board.
         /// </summary>
         /// <param name="board">The board to calculate a score for.</param>
         /// <returns>The calculated empty score.</returns>
-        private double getEmptyScore(Board board)
+        private double getEmptyScore(Tile[,] board)
         {
             // calculate a score based on the number of empty tiles
             double score = 0.0;
-            int emptyCount = board.getTiles().Cast<Tile>().Count(tile => tile.Number == 0);
+            int emptyCount = board.Cast<Tile>().Count(tile => tile.Number == 0);
             score += _emptyWeight * emptyCount;
             return score;
         }
@@ -195,43 +154,43 @@ namespace _2048
         /// </summary>
         /// <param name="board">The board to calculate a score for.</param>
         /// <returns>The calculated merge score.</returns>
-        private double getMergeScore(Board board)
+        private double getMergeScore(Tile[,] board)
         {
             // calculate a score based on the number of possible merges on the board
             double score = 0.0;
             int mergeCount = 0;
             
-            for (int i = 0; i < board.getSize(); i++)
+            for (int i = 0; i < board.GetLength(0); i++)
             {
-                for (int j = 0; j < board.getSize(); j++)
+                for (int j = 0; j < board.GetLength(0); j++)
                 {
-                    if (board.getTiles()[i, j].Number == 0) continue;
+                    if (board[i, j].Number == 0) continue;
                     
                     //check for out of bounds
-                    if (i + 1 < board.getSize())
+                    if (i + 1 < board.GetLength(0))
                     {
-                        if (board.getTiles()[i + 1, j].Number == board.getTiles()[i, j].Number)
+                        if (board[i + 1, j].Number == board[i, j].Number)
                         {
                             mergeCount++;
                         }
                     }
                     if (i - 1 >= 0)
                     {
-                        if (board.getTiles()[i - 1, j].Number == board.getTiles()[i, j].Number)
+                        if (board[i - 1, j].Number == board[i, j].Number)
                         {
                             mergeCount++;
                         }
                     }
-                    if (j + 1 < board.getSize())
+                    if (j + 1 < board.GetLength(0))
                     {
-                        if (board.getTiles()[i, j + 1].Number == board.getTiles()[i, j].Number)
+                        if (board[i, j + 1].Number == board[i, j].Number)
                         {
                             mergeCount++;
                         }
                     }
                     if (j - 1 >= 0)
                     {
-                        if (board.getTiles()[i, j - 1].Number == board.getTiles()[i, j].Number)
+                        if (board[i, j - 1].Number == board[i, j].Number)
                         {
                             mergeCount++;
                         }

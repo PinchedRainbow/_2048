@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace _2048
@@ -24,11 +25,45 @@ namespace _2048
             //genInitTiles();
         }
 
+        /// <summary>
+        /// Returns a string that represents the current state of the board.
+        /// </summary>
+        /// <returns>The boardString representing the current state of the board.</returns>
+        public string getBoardString()
+        {
+            var boardString = board.Cast<Tile>().Select(t => t.Number.ToString());
+            return string.Join(" ", boardString);
+        }
+
+        /// <summary>
+        /// Constructs the board from a board string.
+        /// </summary>
+        /// <param name="boardString">The boardString of the state to be loaded.</param>
+        public void readBoardString(string boardString)
+        {
+            var numbers = boardString.Split(' ');
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    board[i, j].Number = int.Parse(numbers[i * size + j]);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns the Tile[,] board currently in use.
+        /// </summary>
+        /// <returns>The board.</returns>
         public Tile[,] getTiles()
         {
             return board;
         }
-        
+
+        /// <summary>
+        /// returns the size of the board.
+        /// </summary>
+        /// <returns>The size of the board.</returns>
         public int getSize()
         {
             return size;
@@ -158,7 +193,7 @@ namespace _2048
         public void moveRight()
         {
             mergeTilesOnRight();
-            for (int i = 0; i < size - 1; i++)
+            for (int i = 0; i < size; i++)
             {
                 for (int j = size - 1; j > 0; j--)
                 {

@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.CompilerServices;
 
 namespace _2048
 {
@@ -9,12 +10,13 @@ namespace _2048
             int Size = 4;
             var b = new Board(Size);
             b.genRandomTile();
-            var harvey = new Harvey(0.5, 0.5, 0.5, 0.5);
+            var harvey = new Harvey(0.5, 0.5);
             while (true)
             {
                 b.genRandomTile();
                 b.PrintBoard();
                 //var ch = Console.ReadKey(false).Key;
+                // make a time delay of 1 second
                 ConsoleKey ch = harvey.getAction(b);
                 switch (ch)
                 {
