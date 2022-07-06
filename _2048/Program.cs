@@ -15,7 +15,7 @@ namespace _2048
                 b.genRandomTile();
                 b.PrintBoard();
                 //var ch = Console.ReadKey(false).Key;
-                var ch = harvey.GetAction(b);
+                ConsoleKey ch = harvey.getAction(b);
                 switch (ch)
                 {
                     case ConsoleKey.RightArrow:

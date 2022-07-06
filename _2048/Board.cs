@@ -5,7 +5,7 @@ namespace _2048
 {
     public class Board
     {
-        private readonly Tile[,] board;
+        private Tile[,] board;
         private readonly int size;
 
         public Board(int size)
@@ -24,9 +24,14 @@ namespace _2048
             //genInitTiles();
         }
 
-        public Tile[,] getBoard()
+        public Tile[,] getTiles()
         {
             return board;
+        }
+        
+        public int getSize()
+        {
+            return size;
         }
 
         public void PrintBoard()
@@ -106,6 +111,33 @@ namespace _2048
             return ans;
         }
 
+        /// <summary>
+        /// A method which makes a move on the board and then returns the resultant board.
+        /// </summary>
+        /// <param name="consoleKey">The move to make</param>
+        /// <returns>The resultant board</returns>
+        public Board move(ConsoleKey consoleKey)
+        {
+            switch (consoleKey)
+            {
+                case ConsoleKey.UpArrow:
+                    moveUp();
+                    break;
+                case ConsoleKey.DownArrow:
+                    moveDown();
+                    break;
+                case ConsoleKey.LeftArrow:
+                    moveLeft();
+                    break;
+                case ConsoleKey.RightArrow:
+                    moveRight();
+                    break;
+                default:
+                    break;
+            }
+            return this;
+        }
+        
         public void moveLeft()
         {
             //merge the tiles
@@ -316,5 +348,6 @@ namespace _2048
                 }
             }
         }
+        
     }
 }
