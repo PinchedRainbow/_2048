@@ -8,6 +8,7 @@ namespace _2048
         // initialising variables
         private static bool _quit = false;
         private static readonly string FilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), @"2048_Console\");
+        private static bool AI = false;
         
         private static void Main(string[] args)
         {
@@ -15,6 +16,14 @@ namespace _2048
             if (!Directory.Exists(FilePath))
             {
                 Directory.CreateDirectory(FilePath);
+            }
+            
+            // ask if user wants to play against AI
+            Console.WriteLine("Do you want the moves to be random {Faheem's AI}? (y/n)");
+            string aiAns = Console.ReadLine();
+            if (aiAns == "y")
+            {
+                AI = true;
             }
 
             // ask user if they want to load game or start new one
@@ -36,7 +45,7 @@ namespace _2048
             }
             else
             {
-                PlayGame(new Board(GetBoardSize(),0), true, false);
+                PlayGame(new Board(GetBoardSize(),0), false, AI);
             }
         }
 
@@ -53,7 +62,7 @@ namespace _2048
             var b = new Board(boardSize,score);
             // parse file to board
             b.ReadBoard(game);
-            PlayGame(b, false, false);
+            PlayGame(b, true, AI);
         }
         
         private static void PlayGame(Board b, bool loadedGame, bool AI)
@@ -65,61 +74,114 @@ namespace _2048
                 if (loadedGame) loadedGame = false;
                 else b.GenRandomTile();
                 
-
                 b.PrintBoard();
                 Console.WriteLine("Your current score is {0}", b.Score);
-                // show the different options for the game
                 Console.WriteLine("(L)eft, (R)ight, (U)p, (D)own, (S)ave or (Q)uit");
-                var ch = Console.ReadKey(false).Key;
-                switch (ch)
+                
+                if (AI)
                 {
-                    case ConsoleKey.RightArrow:
-                        Console.WriteLine("Right move made");
-                        CheckForGameOver(b);
-                        b.moveRight();
-                        b.addScore(b.mergeTilesOnRight());
-                        b.moveRight();
-                        continue;
-
-                    case ConsoleKey.LeftArrow:
-                        Console.WriteLine("Left move made");
-                        CheckForGameOver(b);
-                        b.moveLeft();
-                        b.addScore(b.mergeTilesOnLeft());
-                        b.moveLeft();
-                        continue;
-
-                    case ConsoleKey.UpArrow:
-                        Console.WriteLine("Up move made");
-                        CheckForGameOver(b);
-                        b.moveUp();
-                        b.addScore(b.mergeTilesOnUp());
-                        b.moveUp();
-                        continue;
-
-                    case ConsoleKey.DownArrow:
-                        Console.WriteLine("Down move made");
-                        CheckForGameOver(b);
-                        b.moveDown();
-                        b.addScore(b.mergeTilesOnDown());
-                        b.moveDown();
-                        continue;
-                    
-                    case ConsoleKey.S:
-                        // save game
-                        SaveGame(b);
-                        continue;
-                    
-                    case ConsoleKey.Q:
-                        // quits game
-                        Console.WriteLine("\nQuitting game...");       
-                        _quit = true;
-                        break;
+                    // make random move for AI
+                    // choose random direction
+                    var rand = new Random();
+                    int randDir = rand.Next(0, 4);
+                    // make move
+                    switch (randDir)
+                    {
+                        case 0:
+                            // left
+                            LeftFunction(b);
+                            break;
+                        case 1:
+                            // right
+                            RightFunction(b);
+                            break;
+                        case 2:
+                            // up
+                            UpFunction(b);
+                            break;
+                        case 3:
+                            // down
+                            DownFunction(b);
+                            break;
+                    }
                 }
+                else
+                {
+                    // human is playing, get input from user
+                    var ch = Console.ReadKey(false).Key;
+                    switch (ch)
+                    {
+                        case ConsoleKey.RightArrow:
+                            RightFunction(b);
+                            continue;
 
+                        case ConsoleKey.LeftArrow:
+                            LeftFunction(b);
+                            continue;
+
+                        case ConsoleKey.UpArrow:
+                            UpFunction(b);
+                            continue;
+
+                        case ConsoleKey.DownArrow:
+                            DownFunction(b);
+                            continue;
+                    
+                        case ConsoleKey.S:
+                            // save game
+                            SaveGame(b);
+                            continue;
+                    
+                        case ConsoleKey.Q:
+                            // quits game
+                            Console.WriteLine("\nQuitting game...");       
+                            _quit = true;
+                            break;
+                    }
+                    
+                }
+                
                 if (_quit) break;
             }
         }
+
+
+        private static void LeftFunction(Board b)
+        {
+            Console.WriteLine("Left move made");
+            CheckForGameOver(b);
+            b.moveLeft();
+            b.addScore(b.mergeTilesOnLeft());
+            b.moveLeft();
+        }
+        
+        private static void UpFunction(Board b)
+        {
+            Console.WriteLine("Up move made");
+            CheckForGameOver(b);
+            b.moveUp();
+            b.addScore(b.mergeTilesOnUp());
+            b.moveUp();
+        }
+
+        private static void DownFunction(Board b)
+        {
+            Console.WriteLine("Down move made");
+            CheckForGameOver(b);
+            b.moveDown();
+            b.addScore(b.mergeTilesOnDown());
+            b.moveDown();
+        }
+
+        private static void RightFunction(Board b)
+        {
+            Console.WriteLine("Right move made");
+            CheckForGameOver(b);
+            b.moveRight();
+            b.addScore(b.mergeTilesOnRight());
+            b.moveRight();
+        }
+
 
         private static void CheckForGameOver(Board b)
         {
@@ -139,13 +201,17 @@ namespace _2048
             {
                 size = 4;
             }
-            // ensure that board size is between 3 and 10
-            while (size < 3 || size > 10)
+            else
             {
-                Console.WriteLine("Invalid board size. Enter a board size: ");
-                size = int.Parse(Console.ReadLine()!);
+                // ensure that board size is between 2 and 20
+                size = int.Parse(boardSize);
+                while (size < 2 || size > 20)
+                {
+                    Console.WriteLine("Invalid board size. Enter a board size: ");
+                    size = int.Parse(Console.ReadLine()!);
+                }
             }
-            
+
             return size;
         }
 
