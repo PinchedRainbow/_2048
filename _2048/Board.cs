@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 
 namespace _2048
 {
@@ -22,6 +21,11 @@ namespace _2048
                     board[i, j] = new Tile(0, "", i, j);
                 }
             }
+
+            board[0, 0].Number = 2;
+            board[1, 0].Number = 2;
+            board[2, 0].Number = 2;
+            board[3, 0].Number = 2;
 
         }
         
@@ -144,15 +148,23 @@ namespace _2048
         {
             //please move the tiles to the left
             for (int i = 0; i < size; i++)
-            for (int j = 0; j < size; j++)
-                if (board[i, j].Number == 0)
-                    for (int k = j + 1; k < size; k++)
-                        if (board[i, k].Number != 0)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    if (board[i, j].Number == 0)
+                    {
+                        for (int k = j + 1; k < size; k++)
                         {
-                            board[i, j].Number = board[i, k].Number;
-                            board[i, k].Number = 0;
-                            break;
+                            if (board[i, k].Number != 0)
+                            {
+                                board[i, j].Number = board[i, k].Number;
+                                board[i, k].Number = 0;
+                                break;
+                            }
                         }
+                    }
+                }
+            }
         }
 
         public void moveRight()
@@ -235,126 +247,88 @@ namespace _2048
         public int mergeTilesOnDown()
         {
             int total = 0;
-            for (int i = 0; i < size; i++)
+
+            for (int x = 0; x < size; x++)
             {
-                for (int j = size-1; j >= 0; j--)
+                for (int y = size - 1; y > 0; y--)
                 {
-                    if (board[j, i].Number == 0)
+                    if (board[y, x].Number == board[y - 1, x].Number)
                     {
-                        continue;
-                    }
-                    for (int k = j - 1; k >= 0; k--)
-                    {
-                        if (board[k, i].Number == 0)
-                        {
-                            continue;
-                        }
-                        if (board[j, i].Number == board[k, i].Number)
-                        {
-                            board[j, i].Number += board[k, i].Number;
-                            total += board[j, i].Number;
-                            board[k, i].Number = 0;
-                            break;
-                        }
+                        board[y, x].Number *= 2;
+                        total += board[y, x].Number;
+                        board[y - 1, x].Number = 0;
                     }
                 }
             }
+            
+            
+            
             return total;
         }
-
-        public int mergeTilesOnRight()
-        {
-            int total = 0;
-            // merge tiles that have been moved to the right, check if adjacant tiles are the same, if so, merge them and add the value of the two tiles to the first tile all the way to the right
-            for (int i = 0; i < size; i++)
-            {
-                for (int j = size-1; j >=0; j--)
-                {
-                    if (board[i, j].Number == 0)
-                    {
-                        continue;
-                    }
-
-                    for (int k = j - 1; k >= 0; k--)
-                    {
-                        if (board[i, k].Number == 0)
-                        {
-                            continue;
-                        }
-                        if (board[i, j].Number == board[i, k].Number)
-                        {
-                            board[i, j].Number += board[i,k].Number;
-                            total += board[i, j].Number;
-                            board[i, k].Number = 0;
-                            break;
-                        }
-                    }
-                }
-            }
-            return total;
-        }
-
         public int mergeTilesOnUp()
         {
             int total = 0;
-            // merge tiles that have been moved towards up, check if adjacant tiles are the same, if so, merge them and add the value of the two tiles to the first tile all the way to the top
-            for (int i = 0; i < size; i++)
+
+            for (int x = 0; x < size; x++)
             {
-                for (int j = 0; j < size; j++)
+                for (int y = 0; y < size - 1; y++)
                 {
-                    if (board[j, i].Number == 0)
+                    if (board[y, x].Number == board[y + 1, x].Number)
                     {
-                        continue;
-                    }
-                    for (int k = j + 1; k < size; k++)
-                    {
-                        if (board[k, i].Number == 0)
-                        {
-                            continue;
-                        }
-                        if (board[j, i].Number == board[k, i].Number)
-                        {
-                            board[j, i].Number += board[k, i].Number;
-                            total += board[j, i].Number;
-                            board[k, i].Number = 0;
-                            break;
-                        }
+                        board[y, x].Number *= 2;
+                        total += board[y, x].Number;
+                        board[y + 1, x].Number = 0;
                     }
                 }
             }
             return total;
         }
+        
+        
+        public int mergeTilesOnRight()
+        {
+            int total = 0;
+            for (int y = 0; y < size; y++)
+            {
+                for (int x = size - 1; x > 0; x--)
+                {
+                    //Console.WriteLine(x +  " " + y + ": " + board[y,x].Number);
+                    if (board[y, x].Number == board[y, x - 1].Number)
+                    {
+                        //Console.WriteLine("found equal");
+                        board[y, x].Number *= 2;
+                        total += board[y, x].Number;
+                        board[y, x - 1].Number = 0;
+                    }
+                }
+            }
 
+            return total;
+        }
+        
         public int mergeTilesOnLeft()
         {
             int total = 0;
-            // merge tiles that have been moved towards the left, check if adjacent tiles are the same, if so, merge them and make one tile with the sum of the two tiles all the way to the left
-            for (int i = 0; i < size; i++)
+            for (int y = 0; y < size; y++)
             {
-                for (int j = 0; j < size; j++)
+                for (int x = 0; x < size - 1; x++)
                 {
-                    if (board[i, j].Number == 0)
+                    if (board[y, x].Number == board[y, x + 1].Number)
                     {
-                        continue;
-                    }
-
-                    for (int k = j + 1; k < size; k++)
-                    {
-                        if (board[i, k].Number == 0)
-                        {
-                            continue;
-                        }
-                        if (board[i, j].Number == board[i, k].Number)
-                        {
-                            board[i, j].Number += board[i, k].Number;
-                            total += board[i, j].Number;
-                            board[i, k].Number = 0;
-                            break;
-                        }
+                        board[y, x].Number *= 2;
+                        total += board[y, x].Number;
+                        board[y, x + 1].Number = 0;
                     }
                 }
             }
+
             return total;
         }
+        
+        
+        
+        
+        
+        
     }
 }
