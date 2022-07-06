@@ -6,8 +6,15 @@ namespace _2048
     {
         private static void Main(string[] args)
         {
-            int Size = 4;
-            var b = new Board(Size);
+            Console.WriteLine("Enter a board size: ");
+            // ensure that board size is between 3 and 10
+            int boardSize = int.Parse(Console.ReadLine()!);
+            while (boardSize < 3 || boardSize > 10)
+            {
+                Console.WriteLine("Invalid board size. Enter a board size: ");
+                boardSize = int.Parse(Console.ReadLine()!);
+            }
+            var b = new Board(boardSize);
             b.genRandomTile();
             while (true)
             {
