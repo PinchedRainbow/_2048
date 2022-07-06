@@ -9,7 +9,7 @@ namespace _2048
             int Size = 4;
             var b = new Board(Size);
             b.genRandomTile();
-            var harvey = new Harvey();
+            var harvey = new Harvey(0.5, 0.5, 0.5, 0.5);
             while (true)
             {
                 b.genRandomTile();
