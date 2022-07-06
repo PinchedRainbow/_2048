@@ -17,7 +17,7 @@ namespace _2048
                 Directory.CreateDirectory(FilePath);
             }
 
-            // ask user if he wants to load game or start new one
+            // ask user if they want to load game or start new one
             Console.WriteLine("Do you want to load game or start new one? (L/N)");
             string answer = Console.ReadLine();
             if (answer.ToLower() == "l")
@@ -36,7 +36,7 @@ namespace _2048
             }
             else
             {
-                PlayGame(new Board(GetBoardSize()));
+                PlayGame(new Board(GetBoardSize(),0));
             }
         }
 
@@ -48,7 +48,9 @@ namespace _2048
             string game = File.ReadAllText(gamePath);
             // read first line of file to get board size
             int boardSize = int.Parse(game.Split('\n')[0]);
-            var b = new Board(boardSize);
+            // read second line of file to get score
+            int score = int.Parse(game.Split('\n')[1]);
+            var b = new Board(boardSize,score);
             // parse file to board
             b.ReadBoard(game);
             PlayGame(b);
@@ -60,7 +62,7 @@ namespace _2048
             {
                 b.GenRandomTile();
                 b.PrintBoard();
-                
+                Console.WriteLine("Your current score is {0}", b.Score);
                 // show the different options for the game
                 Console.WriteLine("(L)eft, (R)ight, (U)p, (D)own, (S)ave or (Q)uit");
                 var ch = Console.ReadKey(false).Key;
@@ -70,11 +72,15 @@ namespace _2048
                         Console.WriteLine("Right move made");
                         CheckForGameOver(b);
                         b.moveRight();
+                        b.addScore(b.mergeTilesOnRight());
+                        b.moveRight();
                         continue;
 
                     case ConsoleKey.LeftArrow:
                         Console.WriteLine("Left move made");
                         CheckForGameOver(b);
+                        b.moveLeft();
+                        b.addScore(b.mergeTilesOnLeft());
                         b.moveLeft();
                         continue;
 
@@ -82,11 +88,15 @@ namespace _2048
                         Console.WriteLine("Up move made");
                         CheckForGameOver(b);
                         b.moveUp();
+                        b.addScore(b.mergeTilesOnUp());
+                        b.moveUp();
                         continue;
 
                     case ConsoleKey.DownArrow:
                         Console.WriteLine("Down move made");
                         CheckForGameOver(b);
+                        b.moveDown();
+                        b.addScore(b.mergeTilesOnDown());
                         b.moveDown();
                         continue;
                     

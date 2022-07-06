@@ -7,10 +7,12 @@ namespace _2048
     {
         private readonly Tile[,] board;
         private readonly int size;
+        public int Score { get; set; }
 
-        public Board(int size)
+        public Board(int size, int Score)
         {
             this.size = size;
+            this.Score = Score;
             board = new Tile[size, size];
 
             for (int i = 0; i < size; i++)
@@ -27,8 +29,8 @@ namespace _2048
         public override string ToString()
         {
             string save = "";
-            // put board size first 
-            save += size + "\n";
+            // put board size first, then score on the next line.
+            save += size + "\n" + Score + "\n";
             for (int i = 0; i < size; i++)
             {
                 for (int j = 0; j < size; j++)
@@ -45,12 +47,12 @@ namespace _2048
         public void ReadBoard(string save)
         {
             string[] lines = save.Split('\n');
-            for (int i = 1; i < size + 1; i++)
+            for (int i = 2; i < size + 2; i++)
             {
                 string[] numbers = lines[i].Split(' ');
                 for (int j = 0; j < size; j++)
                 {
-                    board[i - 1, j].Number = int.Parse(numbers[j]);
+                    board[i - 2, j].Number = int.Parse(numbers[j]);
                 }
             }
         }
@@ -72,19 +74,20 @@ namespace _2048
             }
         }
         
-        public void GenRandomTile()
+        public int GenRandomTile()
         {
-            int x, y;
+            int x, y, value;
             var rnd = new Random();
             while (true)
             {
                 x = rnd.Next(0, size);
                 y = rnd.Next(0, size);
                 if (board[x, y].Number != 0) continue;
-                int value = rnd.Next(0,10) < 9 ? 2 : 4;
+                value = rnd.Next(0,10) < 9 ? 2 : 4;
                 board[x, y].Number = value;
                 break;
             }
+            return value;
         }
 
         public bool IsGameOver()
@@ -132,10 +135,13 @@ namespace _2048
             return ans;
         }
 
+        public void addScore(int x)
+        {
+            Score += x;
+        }
+
         public void moveLeft()
         {
-            //merge the tiles
-            mergeTilesOnLeft();
             //please move the tiles to the left
             for (int i = 0; i < size; i++)
             for (int j = 0; j < size; j++)
@@ -151,7 +157,6 @@ namespace _2048
 
         public void moveRight()
         {
-            mergeTilesOnRight();
             for (int i = 0; i < size - 1; i++)
             {
                 for (int j = size - 1; j > 0; j--)
@@ -176,7 +181,6 @@ namespace _2048
 
         public void moveUp()
         {
-            mergeTilesOnUp();
             //please move the tiles to the up
             for (int i = 0; i < size; i++)
             {
@@ -206,7 +210,6 @@ namespace _2048
 
         public void moveDown()
         {
-            mergeTilesOnDown();
             // PLEASE MOVE TILES TO THE DOWN
             for (int i = 0; i < size; i++)
             {
@@ -229,8 +232,9 @@ namespace _2048
             
         }
 
-        public void mergeTilesOnDown()
+        public int mergeTilesOnDown()
         {
+            int total = 0;
             for (int i = 0; i < size; i++)
             {
                 for (int j = size-1; j >= 0; j--)
@@ -248,16 +252,19 @@ namespace _2048
                         if (board[j, i].Number == board[k, i].Number)
                         {
                             board[j, i].Number += board[k, i].Number;
+                            total += board[j, i].Number;
                             board[k, i].Number = 0;
                             break;
                         }
                     }
                 }
             }
+            return total;
         }
 
-        public void mergeTilesOnRight()
+        public int mergeTilesOnRight()
         {
+            int total = 0;
             // merge tiles that have been moved to the right, check if adjacant tiles are the same, if so, merge them and add the value of the two tiles to the first tile all the way to the right
             for (int i = 0; i < size; i++)
             {
@@ -276,18 +283,20 @@ namespace _2048
                         }
                         if (board[i, j].Number == board[i, k].Number)
                         {
-                            board[i, j].Number *= 2;
+                            board[i, j].Number += board[i,k].Number;
+                            total += board[i, j].Number;
                             board[i, k].Number = 0;
                             break;
                         }
                     }
                 }
             }
-
+            return total;
         }
 
-        public void mergeTilesOnUp()
+        public int mergeTilesOnUp()
         {
+            int total = 0;
             // merge tiles that have been moved towards up, check if adjacant tiles are the same, if so, merge them and add the value of the two tiles to the first tile all the way to the top
             for (int i = 0; i < size; i++)
             {
@@ -306,16 +315,19 @@ namespace _2048
                         if (board[j, i].Number == board[k, i].Number)
                         {
                             board[j, i].Number += board[k, i].Number;
+                            total += board[j, i].Number;
                             board[k, i].Number = 0;
                             break;
                         }
                     }
                 }
             }
+            return total;
         }
 
-        public void mergeTilesOnLeft()
+        public int mergeTilesOnLeft()
         {
+            int total = 0;
             // merge tiles that have been moved towards the left, check if adjacent tiles are the same, if so, merge them and make one tile with the sum of the two tiles all the way to the left
             for (int i = 0; i < size; i++)
             {
@@ -334,13 +346,15 @@ namespace _2048
                         }
                         if (board[i, j].Number == board[i, k].Number)
                         {
-                            board[i, j].Number *= 2;
+                            board[i, j].Number += board[i, k].Number;
+                            total += board[i, j].Number;
                             board[i, k].Number = 0;
                             break;
                         }
                     }
                 }
             }
+            return total;
         }
     }
 }
