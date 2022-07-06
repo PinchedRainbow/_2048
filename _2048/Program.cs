@@ -36,7 +36,7 @@ namespace _2048
             }
             else
             {
-                PlayGame(new Board(GetBoardSize(),0));
+                PlayGame(new Board(GetBoardSize(),0), true, false);
             }
         }
 
@@ -53,14 +53,19 @@ namespace _2048
             var b = new Board(boardSize,score);
             // parse file to board
             b.ReadBoard(game);
-            PlayGame(b);
+            PlayGame(b, false, false);
         }
         
-        private static void PlayGame(Board b)
+        private static void PlayGame(Board b, bool loadedGame, bool AI)
         {
             while (true)
             {
-                b.GenRandomTile();
+                // checks if the game was loaded from file or not
+                // if the game was loaded from file, the board is already initialized and it doesnt need to have a random tile added to it
+                if (loadedGame) loadedGame = false;
+                else b.GenRandomTile();
+                
+
                 b.PrintBoard();
                 Console.WriteLine("Your current score is {0}", b.Score);
                 // show the different options for the game

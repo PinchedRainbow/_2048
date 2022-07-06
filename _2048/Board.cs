@@ -118,15 +118,12 @@ namespace _2048
                         ans = false;
                     }
                 }
-            }
 
-            for (int i = 0; i < size - 1; i++)
-            {
-                if (board[size-1, i].Number == board[size-1, i + 1].Number)
+                if (board[size - 1, i].Number == board[size - 1, i + 1].Number)
                 {
                     ans = false;
                 }
-                else if (board[i,size-1].Number == board[i+1,size-1].Number)
+                else if (board[i, size - 1].Number == board[i + 1, size - 1].Number)
                 {
                     ans = false;
                 }
