@@ -9,11 +9,13 @@ namespace _2048
             int Size = 4;
             var b = new Board(Size);
             b.genRandomTile();
+            var harvey = new Harvey();
             while (true)
             {
                 b.genRandomTile();
                 b.PrintBoard();
-                var ch = Console.ReadKey(false).Key;
+                //var ch = Console.ReadKey(false).Key;
+                var ch = harvey.GetAction(b);
                 switch (ch)
                 {
                     case ConsoleKey.RightArrow:

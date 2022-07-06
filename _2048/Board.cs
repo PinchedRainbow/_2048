@@ -24,6 +24,10 @@ namespace _2048
             //genInitTiles();
         }
 
+        public Tile[,] getBoard()
+        {
+            return board;
+        }
 
         public void PrintBoard()
         {
