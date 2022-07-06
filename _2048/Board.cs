@@ -21,9 +21,40 @@ namespace _2048
                 }
             }
 
-            //genInitTiles();
+        }
+        
+        // save the current board into a string 
+        public override string ToString()
+        {
+            string save = "";
+            // put board size first 
+            save += size + "\n";
+            for (int i = 0; i < size; i++)
+            {
+                for (int j = 0; j < size; j++)
+                {
+                    save += board[i, j].Number + " ";
+                }
+                save += "\n";
+            }
+            
+            return save;
         }
 
+        // method to read the board from a string
+        public void ReadBoard(string save)
+        {
+            string[] lines = save.Split('\n');
+            for (int i = 1; i < size + 1; i++)
+            {
+                string[] numbers = lines[i].Split(' ');
+                for (int j = 0; j < size; j++)
+                {
+                    board[i - 1, j].Number = int.Parse(numbers[j]);
+                }
+            }
+        }
+        
 
         public void PrintBoard()
         {
@@ -37,12 +68,11 @@ namespace _2048
                     else if (board[i, j].Number.ToString().Length == 2) Console.Write(board[i, j].Number + "    ");
                     else Console.Write(board[i, j].Number + "     ");
                 }
-                Console.WriteLine();
-                Console.WriteLine();
+                Console.WriteLine("\n\n");
             }
         }
         
-        public void genRandomTile()
+        public void GenRandomTile()
         {
             int x, y;
             var rnd = new Random();
@@ -51,13 +81,13 @@ namespace _2048
                 x = rnd.Next(0, size);
                 y = rnd.Next(0, size);
                 if (board[x, y].Number != 0) continue;
-                var value = rnd.Next(0,10) < 9 ? 2 : 4;
+                int value = rnd.Next(0,10) < 9 ? 2 : 4;
                 board[x, y].Number = value;
                 break;
             }
         }
 
-        public bool isGameOver()
+        public bool IsGameOver()
         {
             bool ans = true;
 
