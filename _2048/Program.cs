@@ -6,10 +6,8 @@ namespace _2048
     internal class Program
     {
         // initialising variables
-        private static bool _quit = false;
         private static readonly string FilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.CommonDocuments), @"2048_Console\");
-        private static bool AI = false;
-        
+
         private static void Main(string[] args)
         {
             // check if directory for saving game exists
@@ -18,17 +16,9 @@ namespace _2048
                 Directory.CreateDirectory(FilePath);
             }
             
-            // ask if user wants to play against AI
-            Console.WriteLine("Do you want the moves to be random {Faheem's AI}? (y/n)");
-            string aiAns = Console.ReadLine();
-            if (aiAns == "y")
-            {
-                AI = true;
-            }
-
             // ask user if they want to load game or start new one
             Console.WriteLine("Do you want to load game or start new one? (L/N)");
-            string answer = Console.ReadLine();
+            string answer = "";//Console.ReadLine();
             if (answer.ToLower() == "l")
             {
                 try
@@ -45,7 +35,7 @@ namespace _2048
             }
             else
             {
-                PlayGame(new Board(GetBoardSize(),0), false, AI);
+                PlayGame(new Board(GetBoardSize(),0), false);
             }
         }
 
@@ -62,156 +52,134 @@ namespace _2048
             var b = new Board(boardSize,score);
             // parse file to board
             b.ReadBoard(game);
-            PlayGame(b, true, AI);
+            PlayGame(b, true);
         }
         
-        private static void PlayGame(Board b, bool loadedGame, bool AI)
+        private static void PlayGame(Board b, bool loadedGame)
         {
+            // checks if the game was loaded from file or not
+            // if the game was loaded from file, the board is already initialized and it doesnt need to have a random tile added to it
+            if (!loadedGame)
+            {
+                b.GenRandomTile();
+                b.GenRandomTile();
+            }
+
             while (true)
             {
-                // checks if the game was loaded from file or not
-                // if the game was loaded from file, the board is already initialized and it doesnt need to have a random tile added to it
-                if (loadedGame) loadedGame = false;
-                else b.GenRandomTile();
-                
+
                 b.PrintBoard();
                 Console.WriteLine("Your current score is {0}", b.Score);
                 Console.WriteLine("(L)eft, (R)ight, (U)p, (D)own, (S)ave or (Q)uit");
-                
-                if (AI)
+                if (b.IsGameOver())
                 {
-                    // make random move for AI
-                    // choose random direction
-                    var rand = new Random();
-                    int randDir = rand.Next(0, 4);
-                    // make move
-                    switch (randDir)
-                    {
-                        case 0:
-                            // left
-                            LeftFunction(b);
-                            break;
-                        case 1:
-                            // right
-                            RightFunction(b);
-                            break;
-                        case 2:
-                            // up
-                            UpFunction(b);
-                            break;
-                        case 3:
-                            // down
-                            DownFunction(b);
-                            break;
-                    }
+                    Console.WriteLine("Game over");
+                    return;
                 }
-                else
+
+                var ch = Console.ReadKey(false).Key;
+                switch (ch)
                 {
-                    // human is playing, get input from user
-                    var ch = Console.ReadKey(false).Key;
-                    switch (ch)
-                    {
-                        case ConsoleKey.RightArrow:
-                            RightFunction(b);
-                            continue;
+                    case ConsoleKey.RightArrow:
+                        Right(b);
+                        continue;
 
-                        case ConsoleKey.LeftArrow:
-                            LeftFunction(b);
-                            continue;
+                    case ConsoleKey.LeftArrow:
+                        Left(b);
+                        continue;
 
-                        case ConsoleKey.UpArrow:
-                            UpFunction(b);
-                            continue;
+                    case ConsoleKey.UpArrow:
+                        Up(b);
+                        continue;
 
-                        case ConsoleKey.DownArrow:
-                            DownFunction(b);
-                            continue;
-                    
-                        case ConsoleKey.S:
-                            // save game
-                            SaveGame(b);
-                            continue;
-                    
-                        case ConsoleKey.Q:
-                            // quits game
-                            Console.WriteLine("\nQuitting game...");       
-                            _quit = true;
-                            break;
-                    }
-                    
+                    case ConsoleKey.DownArrow:
+                        Down(b);
+                        continue;
+
+                    case ConsoleKey.S:
+                        // save game
+                        SaveGame(b);
+                        continue;
+
+                    case ConsoleKey.Q:
+                        // quits game
+                        Console.WriteLine("\nQuitting game...");
+                        break;
                 }
-                
-                if (_quit) break;
             }
         }
 
 
-        private static void LeftFunction(Board b)
+        private static void Left(Board b)
         {
+            string boardState = b.BoardString();
             Console.WriteLine("Left move made");
-            CheckForGameOver(b);
             b.moveLeft();
             b.addScore(b.mergeTilesOnLeft());
             b.moveLeft();
+            if (b.BoardString() != boardState)
+            {
+                b.GenRandomTile();
+            }
         }
         
-        private static void UpFunction(Board b)
+        private static void Up(Board b)
         {
+            string boardState = b.BoardString();
             Console.WriteLine("Up move made");
-            CheckForGameOver(b);
             b.moveUp();
             b.addScore(b.mergeTilesOnUp());
             b.moveUp();
+            if (b.BoardString() != boardState)
+            {
+                b.GenRandomTile();
+            }
         }
 
-        private static void DownFunction(Board b)
+        private static void Down(Board b)
         {
+            string boardState = b.BoardString();
             Console.WriteLine("Down move made");
-            CheckForGameOver(b);
             b.moveDown();
             b.addScore(b.mergeTilesOnDown());
             b.moveDown();
+            if (b.BoardString() != boardState)
+            {
+                b.GenRandomTile();
+            }
         }
 
-        private static void RightFunction(Board b)
+        private static void Right(Board b)
         {
+            string boardState = b.BoardString();
             Console.WriteLine("Right move made");
-            CheckForGameOver(b);
             b.moveRight();
             b.addScore(b.mergeTilesOnRight());
             b.moveRight();
-        }
-
-
-        private static void CheckForGameOver(Board b)
-        {
-            if (b.IsGameOver())
+            if (b.BoardString() != boardState)
             {
-                Console.WriteLine("Game over");
-                _quit = true;
+                b.GenRandomTile();
             }
         }
+        
+        
         
         private static int GetBoardSize()
         {
             int size = 0;
             Console.WriteLine("Enter a board size (leave empty for default of 4) : ");
-            string boardSize = Console.ReadLine();
-            if (boardSize == "")
+            
+            while (!(size > 3 && size <= 20))
             {
-                size = 4;
-            }
-            else
-            {
-                // ensure that board size is between 2 and 20
-                size = int.Parse(boardSize);
-                while (size < 2 || size > 20)
+                string boardSize = Console.ReadLine();
+                
+                if (boardSize == "")
                 {
-                    Console.WriteLine("Invalid board size. Enter a board size: ");
-                    size = int.Parse(Console.ReadLine()!);
+                    return 4;
                 }
-            }
 
+                Int32.TryParse(boardSize, out size);
+            }
             return size;
         }
 

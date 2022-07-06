@@ -1,4 +1,6 @@
 using System;
+using System.Diagnostics;
+using System.Linq;
 
 namespace _2048
 {
@@ -8,6 +10,8 @@ namespace _2048
         private readonly int size;
         public int Score { get; set; }
 
+        
+        
         public Board(int size, int Score)
         {
             this.size = size;
@@ -21,14 +25,15 @@ namespace _2048
                     board[i, j] = new Tile(0, "", i, j);
                 }
             }
-
-            board[0, 0].Number = 2;
-            board[1, 0].Number = 2;
-            board[2, 0].Number = 2;
-            board[3, 0].Number = 2;
-
         }
-        
+
+        public string BoardString()
+        {
+            var query = board.Cast<Tile>().Select(t => t.Number.ToString());
+            //var query = from Tile t in board select t.Number.ToString();
+            return String.Join(" ", query);
+        }
+
         // save the current board into a string 
         public override string ToString()
         {
@@ -86,9 +91,10 @@ namespace _2048
             {
                 x = rnd.Next(0, size);
                 y = rnd.Next(0, size);
-                if (board[x, y].Number != 0) continue;
+                if (board[y, x].Number != 0) continue;
                 value = rnd.Next(0,10) < 9 ? 2 : 4;
-                board[x, y].Number = value;
+                board[y, x].Number = value;
+                Console.WriteLine("Generated tile at row:{0}, column:{1}", y,x);
                 break;
             }
             return value;
@@ -96,44 +102,49 @@ namespace _2048
 
         public bool IsGameOver()
         {
-            bool ans = true;
-
-            for (int i = 0; i < size; i++)
+            if (BoardString().Contains("0"))
             {
-                for (int j = 0; j < size; j++)
+                return false;
+            }
+            
+            for (int y = 1; y < size - 1; y++)
+            {
+                for (int x = 1; x < size - 1; x++)
                 {
-                    if (board[i, j].Number == 0)
+                    if (board[y, x].Number == board[y + 1, x].Number ||
+                        board[y, x].Number == board[y - 1, x].Number ||
+                        board[y, x].Number == board[y, x + 1].Number ||
+                        board[y, x].Number == board[y, x - 1].Number)
                     {
-                        ans = false;
+                        return false;
                     }
                 }
             }
 
-            for (int i = 0; i < size - 1; i++)
+            for (int x = 0; x < size - 1; x++)
             {
-                for (int j = 0; j < size - 1; j++)
+                if (board[0, x].Number == board[0, x + 1].Number)
                 {
-                    if (board[i, j].Number == board[i+1,j].Number)
-                    {
-                        ans = false;
-                    }
-                    else if (board[i, j].Number == board[i, j + 1].Number)
-                    {
-                        ans = false;
-                    }
+                    return false;
                 }
-
-                if (board[size - 1, i].Number == board[size - 1, i + 1].Number)
+                if (board[size - 1, x].Number == board[size - 1 , x + 1].Number)
                 {
-                    ans = false;
-                }
-                else if (board[i, size - 1].Number == board[i + 1, size - 1].Number)
-                {
-                    ans = false;
+                    return false;
                 }
             }
 
-            return ans;
+            for (int y = 0; y < size - 1; y++)
+            {
+                if (board[y, 0].Number == board[y + 1, 0].Number)
+                {
+                    return false;
+                }
+                if (board[y, size - 1].Number == board[y + 1, size - 1].Number)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public void addScore(int x)
@@ -166,7 +177,7 @@ namespace _2048
 
         public void moveRight()
         {
-            for (int i = 0; i < size - 1; i++)
+            for (int i = 0; i < size; i++)
             {
                 for (int j = size - 1; j > 0; j--)
                 {
@@ -249,6 +260,11 @@ namespace _2048
             {
                 for (int y = size - 1; y > 0; y--)
                 {
+                    if (board[y, x].Number == 0)
+                    {
+                        continue;
+                    }
+                    
                     if (board[y, x].Number == board[y - 1, x].Number)
                     {
                         board[y, x].Number *= 2;
@@ -257,9 +273,6 @@ namespace _2048
                     }
                 }
             }
-            
-            
-            
             return total;
         }
         public int mergeTilesOnUp()
@@ -270,6 +283,11 @@ namespace _2048
             {
                 for (int y = 0; y < size - 1; y++)
                 {
+                    if (board[y, x].Number == 0)
+                    {
+                        continue;
+                    }
+                    
                     if (board[y, x].Number == board[y + 1, x].Number)
                     {
                         board[y, x].Number *= 2;
@@ -289,10 +307,13 @@ namespace _2048
             {
                 for (int x = size - 1; x > 0; x--)
                 {
-                    //Console.WriteLine(x +  " " + y + ": " + board[y,x].Number);
+                    if (board[y, x].Number == 0)
+                    {
+                        continue;
+                    }
+                    
                     if (board[y, x].Number == board[y, x - 1].Number)
                     {
-                        //Console.WriteLine("found equal");
                         board[y, x].Number *= 2;
                         total += board[y, x].Number;
                         board[y, x - 1].Number = 0;
@@ -310,6 +331,10 @@ namespace _2048
             {
                 for (int x = 0; x < size - 1; x++)
                 {
+                    if (board[y, x].Number == 0)
+                    {
+                        continue;
+                    }
                     if (board[y, x].Number == board[y, x + 1].Number)
                     {
                         board[y, x].Number *= 2;
@@ -318,14 +343,8 @@ namespace _2048
                     }
                 }
             }
-
             return total;
         }
-        
-        
-        
-        
-        
-        
+  
     }
 }
