@@ -141,6 +141,11 @@ namespace _2048
             Score += x;
         }
 
+        public int getSize()
+        {
+            return size;
+        }
+
         public void moveLeft()
         {
             //please move the tiles to the left

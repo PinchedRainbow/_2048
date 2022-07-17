@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using Microsoft.Data.Sqlite;
 
 namespace _2048
 {
@@ -12,6 +13,16 @@ namespace _2048
         
         private static void Main(string[] args)
         {
+            var connection = new SqliteConnection("Data Source=Leaderboard.db");
+            if (!File.Exists("Leaderboard.db"))
+            {
+
+                connection.Open();
+                var cmd = connection.CreateCommand();
+                cmd.CommandText = "CREATE TABLE Leaderboard(Name VARCHAR(100), Score INTEGER, BoardSize INTEGER, PRIMARY KEY (Name))";
+                cmd.ExecuteNonQuery();
+                connection.Close();
+            }
             // check if directory for saving game exists
             if (!Directory.Exists(FilePath))
             {
@@ -25,6 +36,31 @@ namespace _2048
             {
                 AI = true;
             }
+
+            // ask user if they want to see leaderboard
+            Console.WriteLine("Do you want to see the leaderboard? \n1. View all scores \n2. View individual score \n3. No");
+            int tempNum = Convert.ToInt32(Console.ReadLine());
+            switch (tempNum)
+            {
+                case 1:
+                    Console.WriteLine("Enter the size of the board you would like to view the leaderboard for:");
+                    int tempsize = Convert.ToInt32(Console.ReadLine());
+                    ViewAllScores(connection, tempsize);
+                    break;
+
+                case 2:
+                    Console.WriteLine("Enter your name:");
+                    string tempname = Console.ReadLine();
+                    Console.WriteLine("Enter the size of the board you would like to view the score for:");
+                    int tempsize2 = Convert.ToInt32(Console.ReadLine());
+                    DisplayIndividualScore(connection, tempname, tempsize2);
+                    break;
+
+                case 3:
+                    break;
+            }
+
+
 
             // ask user if they want to load game or start new one
             Console.WriteLine("Do you want to load game or start new one? (L/N)");
@@ -134,14 +170,18 @@ namespace _2048
                     
                         case ConsoleKey.Q:
                             // quits game
-                            Console.WriteLine("\nQuitting game...");       
                             _quit = true;
                             break;
                     }
                     
                 }
                 
-                if (_quit) break;
+                if (_quit)
+                {
+                    Console.WriteLine("\nQuitting game...");
+                    AskToSaveScore(new SqliteConnection("Data Source=Leaderboard.db"), b.Score, b.getSize());
+                    break;
+                }
             }
         }
 
@@ -248,6 +288,98 @@ namespace _2048
                 Console.WriteLine("Enter any key to continue...");
                 Console.ReadKey();
             }
+        }
+
+        private static void AskToSaveScore(SqliteConnection conn, int Score, int BoardSize)
+        {
+            Console.WriteLine("Would you like to save score? Y/N");
+            if (Console.ReadLine().ToUpper() == "Y")
+            {
+                Console.WriteLine("Enter your name");
+                string name = Console.ReadLine();
+                InsertValues(conn, name, Score, BoardSize);
+            }
+            else
+            {
+                Console.WriteLine("Score not saved");
+            }
+        }
+
+        static bool CheckIfUserExists(SqliteConnection conn, string Name)
+        {
+            bool ans = false;
+            conn.Open();
+            var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT COUNT(*) FROM Leaderboard WHERE Name='" + Name + "'";
+            int userCount = Convert.ToInt32(cmd.ExecuteScalar());
+            if (userCount > 0)
+            {
+                ans = true;
+            }
+            return ans;
+        }
+
+        private static void InsertValues(SqliteConnection conn, string Name, int Score, int BoardSize)
+        {
+            if (CheckIfUserExists(conn, Name) && Score > GetScoreFromDB(conn, Name, BoardSize))
+            {
+                Console.WriteLine("There already exists a lower score with the current name, update the score? Y/N");
+                if (Console.ReadLine().ToUpper() == "Y")
+                {
+                    conn.Open();
+                    var Cmd = conn.CreateCommand();
+                    Cmd.CommandText = "UPDATE Leaderboard SET Score='" + Score + "' WHERE Name='" + Name + "'";
+                    Cmd.ExecuteNonQuery();
+                    conn.Close();
+                }
+            }
+            else
+            {
+                conn.Open();
+                var cmd = conn.CreateCommand();
+                cmd.CommandText = "INSERT INTO Leaderboard VALUES (@name, @score, @boardsize)";
+                cmd.Parameters.AddWithValue("@name", Name);
+                cmd.Parameters.AddWithValue("@score", Score);
+                cmd.Parameters.AddWithValue("@boardsize", BoardSize);
+                cmd.ExecuteNonQuery();
+                conn.Close();
+            }
+        }
+
+        private static void DisplayIndividualScore(SqliteConnection conn, string Name, int BoardSize)
+        {
+            conn.Open();
+            var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT * FROM Leaderboard WHERE Name='" + Name + "' AND BoardSize='" + BoardSize + "'";
+            var reader = cmd.ExecuteReader();
+            reader.Read();
+            Console.WriteLine("Name = {0} \nScore = {1}", reader["Name"].ToString(), reader["Score"].ToString());
+            conn.Close();
+        }
+
+        private static int GetScoreFromDB(SqliteConnection conn, string Name, int BoardSize)
+        {
+            int score;
+            conn.Open();
+            var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT * FROM Leaderboard WHERE Name='" + Name + "' AND BoardSize='" + BoardSize + "'";
+            var reader = cmd.ExecuteReader();
+            reader.Read();
+            score = Convert.ToInt32(reader["Score"]);
+            conn.Close();
+            return score;
+        }
+        private static void ViewAllScores(SqliteConnection conn, int BoardSize)
+        {
+            conn.Open();
+            var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT * FROM Leaderboard WHERE BoardSize='" + BoardSize + "' ORDER BY Score ASC";
+            var reader = cmd.ExecuteReader();
+            reader.Read();
+
+            conn.Close();
+            //Idk what to do from here;
+
         }
     }
 }
