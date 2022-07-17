@@ -225,16 +225,14 @@ namespace _2048
 
         private static void CheckForGameOver(Board b)
         {
-            if (b.IsGameOver())
-            {
-                Console.WriteLine("Game over");
-                _quit = true;
-            }
+            if (!b.IsGameOver()) return;
+            Console.WriteLine("Game over");
+            _quit = true;
         }
         
         private static int GetBoardSize()
         {
-            int size = 0;
+            int size;
             Console.WriteLine("Enter a board size (leave empty for default of 4) : ");
             string boardSize = Console.ReadLine();
             if (boardSize == "")
